@@ -108,6 +108,17 @@ namespace ProgClaims.Controllers
 
             return RedirectToAction("ManagerView"); // Redirect back to the manager view
         }
+        public IActionResult DownloadFile(string filePath)
+        {
+            if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
+            {
+                return NotFound(); // Return 404 if file doesn't exist
+            }
+
+            var fileBytes = System.IO.File.ReadAllBytes(filePath);
+            var fileName = Path.GetFileName(filePath);
+            return File(fileBytes, "application/octet-stream", fileName);
+        }
 
         // Success page
         public IActionResult Success()

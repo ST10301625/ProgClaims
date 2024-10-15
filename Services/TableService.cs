@@ -1,7 +1,8 @@
 ﻿using Azure;
 using Azure.Data.Tables;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
 using ProgClaims.Models;
 
 namespace ProgClaims.Services
@@ -12,16 +13,14 @@ namespace ProgClaims.Services
 
         public TableService(string connectionString, string tableName)
         {
-            // Create a TableServiceClient and get the TableClient for the specified table
             var serviceClient = new TableServiceClient(connectionString);
             _tableClient = serviceClient.GetTableClient(tableName);
-            _tableClient.CreateIfNotExists(); // Ensure the table is created if it doesn't exist
+            _tableClient.CreateIfNotExists();
         }
 
         // Method to add a new claim to the table
         public async Task AddClaimAsync(ClaimEntity claim)
         {
-            // Add the claim entity to the table
             await _tableClient.AddEntityAsync(claim);
         }
 
@@ -29,8 +28,6 @@ namespace ProgClaims.Services
         public async Task<List<ClaimEntity>> GetAllClaimsAsync()
         {
             var claims = new List<ClaimEntity>();
-
-            // Retrieve all entities in the table
             await foreach (var entity in _tableClient.QueryAsync<ClaimEntity>())
             {
                 claims.Add(entity);
@@ -42,9 +39,8 @@ namespace ProgClaims.Services
         public async Task<List<ClaimEntity>> GetPendingClaimsAsync()
         {
             var claims = new List<ClaimEntity>();
-
-            // Query for claims with a status of "Pending"
             var query = _tableClient.QueryAsync<ClaimEntity>(claim => claim.Status == "Pending");
+
             await foreach (var entity in query)
             {
                 claims.Add(entity);
@@ -58,25 +54,18 @@ namespace ProgClaims.Services
         {
             try
             {
-                // Try to retrieve the entity using PartitionKey and RowKey
                 return await _tableClient.GetEntityAsync<ClaimEntity>(partitionKey, rowKey);
             }
             catch (RequestFailedException ex) when (ex.Status == 404)
             {
-                return null; // Return null if the claim is not found (404 Not Found)
-            }
-            catch (RequestFailedException ex)
-            {
-                // Log other exceptions if necessary (optional)
-                throw new Exception($"Error retrieving claim: {ex.Message}");
+                return null; // Return null if the claim is not found
             }
         }
 
         // Method to update a claim
         public async Task UpdateClaimAsync(ClaimEntity claim)
         {
-            // Update the claim entity using its ETag for concurrency control
-            await _tableClient.UpdateEntityAsync(claim, claim.ETag);
+            await _tableClient.UpdateEntityAsync(claim, claim.ETag); // Use claim.ETag to ensure correct entity update
         }
     }
 }
