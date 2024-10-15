@@ -4,8 +4,7 @@ using System;
 using ProgClaims.Models;
 using ProgClaims.Services;
 using Microsoft.AspNetCore.Http;
-using ProgClaims.Models;
-using ProgClaims.Services;
+
 
 namespace ProgClaims.Controllers
 {
