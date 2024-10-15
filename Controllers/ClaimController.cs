@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System;
+using System.Collections.Generic;
 using ProgClaims.Models;
 using ProgClaims.Services;
 using Microsoft.AspNetCore.Http;
-
 
 namespace ProgClaims.Controllers
 {
@@ -55,7 +55,9 @@ namespace ProgClaims.Controllers
                 Date = DateTime.UtcNow,
                 HoursWorked = hoursWorked,
                 HourlyRate = hourlyRate,
-                Notes = notes
+                Notes = notes,
+                LecturerName = lecturerName, // Store the lecturer's name
+                Status = "Pending" // Set initial status to Pending
             };
             await _tableService.AddClaimAsync(claim);
 
@@ -69,6 +71,42 @@ namespace ProgClaims.Controllers
             }
 
             return RedirectToAction("Success");
+        }
+
+        // GET: /Claim/ManagerView
+        [HttpGet]
+        public async Task<IActionResult> ManagerView()
+        {
+            var claims = await _tableService.GetPendingClaimsAsync(); // Fetch all pending claims for verification
+            return View(claims); // Render the manager view with claims
+        }
+
+        // POST: /Claim/ApproveClaim
+        [HttpPost]
+        public async Task<IActionResult> ApproveClaim(string rowKey, string partitionKey)
+        {
+            var claim = await _tableService.GetClaimAsync(partitionKey, rowKey);
+            if (claim != null)
+            {
+                claim.Status = "Approved"; // Update the claim status
+                await _tableService.UpdateClaimAsync(claim); // Update claim in the storage
+            }
+
+            return RedirectToAction("ManagerView"); // Redirect back to the manager view
+        }
+
+        // POST: /Claim/RejectClaim
+        [HttpPost]
+        public async Task<IActionResult> RejectClaim(string rowKey, string partitionKey)
+        {
+            var claim = await _tableService.GetClaimAsync(partitionKey, rowKey);
+            if (claim != null)
+            {
+                claim.Status = "Rejected"; // Update the claim status
+                await _tableService.UpdateClaimAsync(claim); // Update claim in the storage
+            }
+
+            return RedirectToAction("ManagerView"); // Redirect back to the manager view
         }
 
         // Success page

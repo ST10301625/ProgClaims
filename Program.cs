@@ -14,12 +14,14 @@ namespace ProgClaims
             // Register TableService for handling lecturer claims in Azure Table Storage
             builder.Services.AddSingleton(new TableService(
                 builder.Configuration.GetConnectionString("AzureStorage"),
-                "LecturerClaims")); // The table name is "LecturerClaims"
+                "LecturerClaims" // The table name is "LecturerClaims"
+            ));
 
             // Register FileService for handling file uploads to Azure File Storage
             builder.Services.AddSingleton(new FileService(
                 builder.Configuration.GetConnectionString("AzureStorage"),
-                "lecturerfile")); // The file share name is "lecturerfile"
+                "lecturerfile" // The file share name is "lecturerfile"
+            ));
 
             var app = builder.Build();
 
@@ -40,7 +42,8 @@ namespace ProgClaims
             // Set default routing pattern for controllers and actions
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{controller=Home}/{action=Index}/{id?}"
+            );
 
             app.Run();
         }

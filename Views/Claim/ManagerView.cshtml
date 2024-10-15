@@ -1,0 +1,67 @@
+﻿@model IEnumerable<ProgClaims.Models.ClaimEntity>
+
+<div class="bg-secondary text-white text-center py-3">
+    <h1>Manager Verification</h1>
+</div>
+
+<div class="container mt-5">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">Claims Pending Verification</h2>
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Lecturer Name</th>
+                        <th>Hours Worked</th>
+                        <th>Hourly Rate</th>
+                        <th>Notes</th>
+                        <th>Date Submitted</th>
+                        <th>Verification Status</th> <!-- Added new column for status -->
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var claim in Model)
+                        {
+                            <tr>
+                                <td>@claim.LecturerName</td>
+                                <td>@claim.HoursWorked</td>
+                                <td>@claim.HourlyRate.ToString("C2")</td> <!-- Format as currency -->
+                                <td>@claim.Notes</td>
+                                <td>@claim.Date.ToString("MM/dd/yyyy")</td> <!-- Format the date for better readability -->
+                                <td>
+                                    <select name="VerificationStatus" class="form-select">
+                                        <option value="Verified">Verified</option>
+                                        <option value="Non-Verified">Non-Verified</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <form method="post" asp-action="ApproveClaim" style="display:inline;">
+                                        <input type="hidden" name="RowKey" value="@claim.RowKey" />
+                                        <input type="hidden" name="PartitionKey" value="@claim.PartitionKey" />
+                                        <button type="submit" class="btn btn-success">Approve</button>
+                                    </form>
+                                    <form method="post" asp-action="RejectClaim" style="display:inline;">
+                                        <input type="hidden" name="RowKey" value="@claim.RowKey" />
+                                        <input type="hidden" name="PartitionKey" value="@claim.PartitionKey" />
+                                        <button type="submit" class="btn btn-danger">Reject</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center">No claims pending verification.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
